@@ -1,8 +1,8 @@
-FROM gradle:8.10-alpine AS compile
+FROM gradle:9.0 AS compile
 COPY . .
 RUN gradle clean build --no-daemon
 
-FROM eclipse-temurin:21.0.4_7-jre-noble
+FROM eclipse-temurin:25
 WORKDIR /home/application/java
 COPY --from=compile "/home/gradle/build/libs/application.jar" .
 EXPOSE 8080

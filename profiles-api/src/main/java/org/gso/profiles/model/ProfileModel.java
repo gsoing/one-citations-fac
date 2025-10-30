@@ -34,15 +34,14 @@ public class ProfileModel {
     private LocalDateTime modified;
 
     public ProfileDto toDto() {
-        return ProfileDto.builder()
-                .id(this.id)
-                .userId(this.userId)
-                .mail(this.mail)
-                .age(this.age)
-                .firstName(this.firstName)
-                .lastName(this.lastName)
-                .created(this.created)
-                .modified(this.modified)
-                .build();
+        return new ProfileDto(
+                this.id,
+                this.userId,
+                this.mail,
+                this.age,
+                this.firstName,
+                lastName,
+                this.created,
+                this.modified);
     }
 }

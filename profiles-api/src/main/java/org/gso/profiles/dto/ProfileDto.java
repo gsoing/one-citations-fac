@@ -9,34 +9,20 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.gso.profiles.model.ProfileModel;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class ProfileDto {
-
-    private String id;
-    @NotEmpty
-    private String userId;
-    @Email
-    private String mail;
-    @Min(13)
-    private int age;
-    private String firstName;
-    private String lastName;
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
-    private LocalDateTime created;
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
-    private LocalDateTime modified;
+public record ProfileDto (
+        String id,
+        @NotEmpty String userId,
+        @Email String mail,
+        @Min(13) int age,
+        String firstName,
+        String lastName,
+        @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
+        LocalDateTime created,
+        @JsonSerialize(using = LocalDateTimeSerializer.class) @JsonFormat(pattern = "YYYY-MM-DD HH:mm:ss")
+        LocalDateTime modified) {
 
     public ProfileModel toModel() {
         return ProfileModel.builder()
@@ -46,5 +32,18 @@ public class ProfileDto {
                 .firstName(this.firstName)
                 .lastName(this.lastName)
                 .build();
+    }
+
+    public ProfileDto withId(String id) {
+        return new ProfileDto(
+                id,
+                this.userId,
+                this.mail,
+                this.age,
+                this.firstName,
+                this.lastName,
+                this.created,
+                this.modified
+        );
     }
 }

@@ -1,5 +1,6 @@
 package org.gso.profiles.endpoint;
 
+import java.net.URI;
 import java.util.List;
 
 import com.github.rutledgepaulv.qbuilders.builders.GeneralQueryBuilder;
@@ -43,10 +44,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class ProfileController {
 
     public static final String PATH = "/api/v1/profiles";
-    public static int MAX_PAGE_SIZE = 200;
+    private static final int MAX_PAGE_SIZE = 200;
 
     private final ProfileService profileService;
-    private QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
+    private final QueryConversionPipeline pipeline = QueryConversionPipeline.defaultPipeline();
 
     @PostMapping(consumes = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<ProfileDto> createProfile(@RequestBody ProfileDto profileDto) {
@@ -54,7 +55,7 @@ public class ProfileController {
         return ResponseEntity
                 .created(
                         ServletUriComponentsBuilder.fromCurrentContextPath()
-                                .path(createdProdile.getId())
+                                .path(createdProdile.id())
                                 .build()
                                 .toUri()
                 ).body(createdProdile);
@@ -66,9 +67,9 @@ public class ProfileController {
     }
 
     @PutMapping(path = "/{id}", consumes = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<ProfileDto> updateProfile(@PathVariable @NonNull String profileId,
+    public ResponseEntity<ProfileDto> updateProfile(@PathVariable("id") @NonNull String profileId,
                                                     @RequestBody @NonNull ProfileDto profileDto) {
-        profileDto.setId(profileId);
+        profileDto = profileDto.withId(profileId);
         return ResponseEntity.ok(profileService.updateProfile(profileDto.toModel()).toDto());
     }
 
@@ -95,7 +96,7 @@ public class ProfileController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity getCurrentUserProfile(JwtAuthenticationToken principal) {
+    public ResponseEntity<JwtAuthenticationToken> getCurrentUserProfile(JwtAuthenticationToken principal) {
         return ResponseEntity.ok(principal);
     }
 
@@ -125,28 +126,27 @@ public class ProfileController {
 
     private PageDto<ProfileDto> toPageDto(Page<ProfileModel> results) {
         List<ProfileDto> profiles = results.map(ProfileModel::toDto).toList();
-        PageDto<ProfileDto> pageResults = new PageDto<>();
-        pageResults.setData(profiles);
-        pageResults.setTotalElements(results.getTotalElements());
-        pageResults.setPageSize(results.getSize());
+        URI nextUri = null;
         if (results.hasNext()) {
-            results.nextOrLastPageable();
-            pageResults.setNext(
+            nextUri =
                     ServletUriComponentsBuilder.fromCurrentContextPath()
                             .queryParam("page", results.nextOrLastPageable().getPageNumber())
                             .queryParam("size", results.nextOrLastPageable().getPageSize())
-                            .build().toUri());
+                            .build().toUri();
         }
-        pageResults.setFirst(
+
+        return new PageDto<>(
+                results.getSize(),
+                results.getTotalElements(),
+                nextUri,
                 ServletUriComponentsBuilder.fromCurrentContextPath()
                         .queryParam("page", results.previousOrFirstPageable().getPageNumber())
                         .queryParam("size", results.previousOrFirstPageable().getPageSize())
-                        .build().toUri());
-        pageResults.setLast(
-                ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .queryParam("page", results.nextOrLastPageable().getPageNumber())
-                        .queryParam("size", results.nextOrLastPageable().getPageSize())
-                        .build().toUri());
-        return pageResults;
+                        .build().toUri(),
+        ServletUriComponentsBuilder.fromCurrentContextPath()
+                .queryParam("page", results.nextOrLastPageable().getPageNumber())
+                .queryParam("size", results.nextOrLastPageable().getPageSize())
+                .build().toUri(),
+                profiles);
     }
 }

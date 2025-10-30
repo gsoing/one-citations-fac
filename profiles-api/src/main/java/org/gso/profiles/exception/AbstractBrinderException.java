@@ -11,13 +11,13 @@ public abstract class AbstractBrinderException extends RuntimeException{
 
 
 
-    public AbstractBrinderException(HttpStatus httpStatus, ErrorMessage errorMessage) {
+    protected AbstractBrinderException(HttpStatus httpStatus, ErrorMessage errorMessage) {
         super(errorMessage.message());
         this.errorMessage = errorMessage;
         this.httpStatus = httpStatus;
     }
 
-    public AbstractBrinderException(ErrorMessage errorMessage) {
+    protected AbstractBrinderException(ErrorMessage errorMessage) {
         this(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage);
     }
 

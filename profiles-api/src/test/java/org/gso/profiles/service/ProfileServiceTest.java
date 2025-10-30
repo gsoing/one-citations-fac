@@ -7,7 +7,7 @@ import org.gso.profiles.repository.ProfileRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -18,7 +18,7 @@ public class ProfileServiceTest {
     @Autowired
     ProfileService profileService;
 
-    @MockBean
+    @MockitoBean
     ProfileRepository profileRepository;
 
     @Test
